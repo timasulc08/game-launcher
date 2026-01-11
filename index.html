@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Launcher</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Кастомный заголовок окна -->
+    <div class="title-bar">
+        <div class="title-bar-left">
+            <div class="logo">
+                <img src="assets/logo.png" alt="Logo" class="logo-img">
+                <span>Swift</span>
+            </div>
+        </div>
+        <div class="title-bar-right">
+            <button class="title-btn" id="minimize-btn">
+                <i class="ri-subtract-line"></i>
+            </button>
+            <button class="title-btn" id="maximize-btn">
+                <i class="ri-checkbox-blank-line"></i>
+            </button>
+            <button class="title-btn close-btn" id="close-btn">
+                <i class="ri-close-line"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="app-container">
+        <!-- Левая панель -->
+        <aside class="sidebar">
+            <!-- Профиль -->
+            <div class="profile-section">
+                <div class="avatar">
+                    <i class="ri-user-fill"></i>
+                </div>
+                <span class="username">Игрок</span>
+            </div>
+
+            <!-- Навигация -->
+            <nav class="nav-menu">
+                <a href="#" class="nav-item active" data-section="store">
+                    <i class="ri-store-2-fill"></i>
+                    <span>Магазин</span>
+                </a>
+                <a href="#" class="nav-item" data-section="library">
+                    <i class="ri-gamepad-fill"></i>
+                    <span>Библиотека</span>
+                </a>
+                <a href="#" class="nav-item" data-section="settings">
+                    <i class="ri-settings-3-fill"></i>
+                    <span>Настройки</span>
+                </a>
+            </nav>
+
+            <!-- Нижняя часть сайдбара -->
+            <div class="sidebar-footer">
+                <div class="version">Dev Version</div>
+            </div>
+        </aside>
+
+        <!-- Основной контент -->
+        <main class="main-content">
+            <!-- Магазин -->
+            <section class="content-section active" id="store">
+                <div class="section-header">
+                    <h1>Магазин</h1>
+                    <div class="search-bar">
+                        <i class="ri-search-line"></i>
+                        <input type="text" placeholder="Поиск игр..." id="search-input">
+                    </div>
+                </div>
+
+                <!-- Статистика -->
+                <div class="store-stats">
+                    <div class="stat-card">
+                        <i class="ri-gamepad-line"></i>
+                        <div class="stat-card-info">
+                            <span class="stat-card-value" id="total-games-count">0</span>
+                            <span class="stat-card-label">Всего игр</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="ri-download-line"></i>
+                        <div class="stat-card-info">
+                            <span class="stat-card-value" id="installed-games-count">0</span>
+                            <span class="stat-card-label">Установлено</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="ri-folder-3-line"></i>
+                        <div class="stat-card-info">
+                            <span class="stat-card-value" id="games-source">Xatab</span>
+                            <span class="stat-card-label">Источник</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Сетка игр -->
+                <div class="games-grid" id="store-games">
+                    <div class="loading-games">
+                        <div class="loading-spinner"></div>
+                        <span>Загрузка игр...</span>
+                    </div>
+                </div>
+
+                <!-- Пагинация -->
+                <div class="pagination" id="pagination">
+                    <!-- Кнопки добавятся через JS -->
+                </div>
+            </section>
+
+            <!-- Библиотека -->
+            <section class="content-section" id="library">
+                <div class="section-header">
+                    <h1>Моя библиотека</h1>
+                    <button class="add-game-btn" id="add-game-btn">
+                        <i class="ri-add-line"></i>
+                        Добавить игру
+                    </button>
+                </div>
+
+                <div class="games-grid" id="library-games">
+                    <!-- Кнопка добавления игры (как карточка) -->
+                    <div class="game-card add-game-card" id="add-game-card">
+                        <div class="add-game-content">
+                            <i class="ri-add-line"></i>
+                            <span>Добавить игру</span>
+                        </div>
+                    </div>
+                    <!-- Игры будут добавлены через JS -->
+                </div>
+
+                <div class="empty-library" id="empty-library">
+                    <i class="ri-gamepad-line"></i>
+                    <p>Библиотека пуста</p>
+                    <span>Добавьте свою первую игру!</span>
+                </div>
+            </section>
+
+            <!-- Настройки -->
+            <section class="content-section" id="settings">
+                <div class="section-header">
+                    <h1>Настройки</h1>
+                </div>
+
+                <div class="settings-container">
+                    <!-- Темы -->
+                    <div class="settings-group">
+                        <div class="settings-group-header">
+                            <h3><i class="ri-palette-line"></i> Темы оформления</h3>
+                            <button class="small-btn" id="create-theme-btn">
+                                <i class="ri-add-line"></i> Создать тему
+                            </button>
+                        </div>
+                        
+                        <div class="themes-grid" id="themes-grid">
+                            <!-- Темы будут добавлены через JS -->
+                        </div>
+                    </div>
+
+                    <!-- Общие настройки -->
+                    <div class="settings-group">
+                        <h3><i class="ri-settings-3-line"></i> Общие</h3>
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <span class="setting-label">Запуск при старте системы</span>
+                                <span class="setting-desc">Автоматически открывать лаунчер</span>
+                            </div>
+                            <label class="toggle">
+                                <input type="checkbox" id="autostart-toggle">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <span class="setting-label">Сворачивать при запуске игры</span>
+                                <span class="setting-desc">Лаунчер свернётся в трей</span>
+                            </div>
+                            <label class="toggle">
+                                <input type="checkbox" id="minimize-toggle" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Управление данными -->
+                    <div class="settings-group">
+                        <h3><i class="ri-refresh-line"></i> Обновления</h3>
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <span class="setting-label">Текущая версия</span>
+                                <span class="setting-desc" id="current-version">1.0.0</span>
+                            </div>
+                            <button class="setting-btn" id="check-updates-btn">
+                                <i class="ri-refresh-line"></i> Проверить
+                            </button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Модальное окно добавления игры -->
+    <div class="modal-overlay" id="add-game-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Добавить игру</h2>
+                <button class="modal-close" id="modal-close">
+                    <i class="ri-close-line"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Название игры</label>
+                    <input type="text" id="game-name" placeholder="Введите название...">
+                </div>
+                <div class="form-group">
+                    <label>Путь к .exe файлу</label>
+                    <div class="file-input">
+                        <input type="text" id="game-path" placeholder="C:\Games\game.exe" readonly>
+                        <button id="browse-btn">Обзор</button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Обложка (URL или путь)</label>
+                    <input type="text" id="game-cover" placeholder="https://... или путь к файлу">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancel-btn">Отмена</button>
+                <button class="btn btn-primary" id="save-game-btn">Добавить</button>
+            </div>
+        </div>
+    </div>
+
+        <!-- Контекстное меню -->
+    <div class="context-menu" id="context-menu">
+        <div class="context-menu-item" id="ctx-play">
+            <i class="ri-play-fill"></i>
+            <span>Запустить</span>
+        </div>
+        <div class="context-menu-item" id="ctx-settings">
+            <i class="ri-settings-3-line"></i>
+            <span>Настройки игры</span>
+        </div>
+        <div class="context-menu-divider"></div>
+        <div class="context-menu-item" id="ctx-open-folder">
+            <i class="ri-folder-open-line"></i>
+            <span>Открыть папку игры</span>
+        </div>
+        <div class="context-menu-divider"></div>
+        <div class="context-menu-item danger" id="ctx-delete">
+            <i class="ri-delete-bin-line"></i>
+            <span>Удалить из библиотеки</span>
+        </div>
+    </div>
+
+    <!-- Модальное окно настроек игры -->
+    <div class="modal-overlay" id="game-settings-modal">
+        <div class="modal modal-large">
+            <div class="modal-header">
+                <h2>Настройки игры</h2>
+                <button class="modal-close" id="settings-modal-close">
+                    <i class="ri-close-line"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="settings-preview">
+                    <div class="preview-cover" id="preview-cover">
+                        <img src="" alt="Обложка" id="preview-cover-img">
+                        <div class="preview-placeholder">
+                            <i class="ri-image-line"></i>
+                        </div>
+                    </div>
+                    <div class="preview-info">
+                        <h3 id="preview-game-name">Название игры</h3>
+                        <p id="preview-game-path">Путь к игре</p>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Название игры</label>
+                    <input type="text" id="edit-game-name" placeholder="Введите название...">
+                </div>
+
+                <div class="form-group">
+                    <label>Путь к .exe файлу</label>
+                    <div class="file-input">
+                        <input type="text" id="edit-game-path" placeholder="C:\Games\game.exe" readonly>
+                        <button id="edit-browse-btn">Обзор</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Обложка игры</label>
+                    <div class="cover-options">
+                        <div class="cover-option">
+                            <input type="radio" name="cover-type" id="cover-url" value="url" checked>
+                            <label for="cover-url">URL ссылка</label>
+                        </div>
+                        <div class="cover-option">
+                            <input type="radio" name="cover-type" id="cover-file" value="file">
+                            <label for="cover-file">Локальный файл</label>
+                        </div>
+                    </div>
+                    <div class="file-input" id="cover-input-container">
+                        <input type="text" id="edit-game-cover" placeholder="https://... или путь к изображению">
+                        <button id="edit-cover-browse-btn">Обзор</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Параметры запуска (необязательно)</label>
+                    <input type="text" id="edit-launch-params" placeholder="Например: -fullscreen -dx11">
+                </div>
+
+                <div class="game-stats">
+                    <div class="stat-item">
+                        <i class="ri-time-line"></i>
+                        <div class="stat-info">
+                            <span class="stat-label">Время в игре</span>
+                            <span class="stat-value" id="stat-playtime">0 часов</span>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <i class="ri-calendar-line"></i>
+                        <div class="stat-info">
+                            <span class="stat-label">Добавлено</span>
+                            <span class="stat-value" id="stat-added">—</span>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <i class="ri-play-circle-line"></i>
+                        <div class="stat-info">
+                            <span class="stat-label">Последний запуск</span>
+                            <span class="stat-value" id="stat-last-played">Никогда</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-danger" id="delete-game-btn">
+                    <i class="ri-delete-bin-line"></i> Удалить
+                </button>
+                <div class="modal-footer-right">
+                    <button class="btn btn-secondary" id="cancel-settings-btn">Отмена</button>
+                    <button class="btn btn-primary" id="save-settings-btn">Сохранить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+        <!-- Модальное окно редактора тем -->
+    <div class="modal-overlay" id="theme-editor-modal">
+        <div class="modal modal-theme-editor">
+            <div class="modal-header">
+                <h2 id="theme-editor-title">Создать тему</h2>
+                <button class="modal-close" id="theme-editor-close">
+                    <i class="ri-close-line"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="theme-editor-layout">
+                    <!-- Левая панель - настройки -->
+                    <div class="theme-editor-controls">
+                        <div class="form-group">
+                            <label>Название темы</label>
+                            <input type="text" id="theme-name-input" placeholder="Моя тема">
+                        </div>
+
+                        <div class="color-section">
+                            <h4>Основные цвета</h4>
+                            
+                            <div class="color-picker-group">
+                                <label>Основной фон</label>
+                                <div class="color-input-wrapper">
+                                    <input type="color" id="color-bg-primary" value="#0f0f1a">
+                                    <input type="text" class="color-text" data-for="color-bg-primary" value="#0f0f1a">
+                                </div>
+                            </div>
+
+                            <div class="color-picker-group">
+                                <label>Вторичный фон</label>
+                                <div class="color-input-wrapper">
+                                    <input type="color" id="color-bg-secondary" value="#1a1a2e">
+                                    <input type="text" class="color-text" data-for="color-bg-secondary" value="#1a1a2e">
+                                </div>
+                            </div>
+
+                            <div class="color-picker-group">
+                                <label>Третичный фон</label>
+                                <div class="color-input-wrapper">
+                                    <input type="color" id="color-bg-tertiary" value="#25253d">
+                                    <input type="text" class="color-text" data-for="color-bg-tertiary" value="#25253d">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="color-section">
+                            <h4>Акцентные цвета</h4>
+                            
+                            <div class="color-picker-group">
+                                <label>Акцент</label>
+                                <div class="color-input-wrapper">
+                                    <input type="color" id="color-accent" value="#6c5ce7">
+                                    <input type="text" class="color-text" data-for="color-accent" value="#6c5ce7">
+                                </div>
+                            </div>
+
+                            <div class="color-picker-group">
+                                <label>Акцент (наведение)</label>
+                                <div class="color-input-wrapper">
+                                    <input type="color" id="color-accent-hover" value="#5b4cdb">
+                                    <input type="text" class="color-text" data-for="color-accent-hover" value="#5b4cdb">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="color-section">
+                            <h4>Текст</h4>
+                            
+                            <div class="color-picker-group">
+                                <label>Основной текст</label>
+                                <div class="color-input-wrapper">
+                                    <input type="color" id="color-text-primary" value="#ffffff">
+                                    <input type="text" class="color-text" data-for="color-text-primary" value="#ffffff">
+                                </div>
+                            </div>
+
+                            <div class="color-picker-group">
+                                <label>Вторичный текст</label>
+                                <div class="color-input-wrapper">
+                                    <input type="color" id="color-text-secondary" value="#a0a0b0">
+                                    <input type="text" class="color-text" data-for="color-text-secondary" value="#a0a0b0">
+                                </div>
+                            </div>
+
+                            <div class="color-picker-group">
+                                <label>Приглушённый текст</label>
+                                <div class="color-input-wrapper">
+                                    <input type="color" id="color-text-muted" value="#6c6c7c">
+                                    <input type="text" class="color-text" data-for="color-text-muted" value="#6c6c7c">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="color-section">
+                            <h4>Дополнительные</h4>
+                            
+                            <div class="color-picker-group">
+                                <label>Границы</label>
+                                <div class="color-input-wrapper">
+                                    <input type="color" id="color-border" value="#2d2d44">
+                                    <input type="text" class="color-text" data-for="color-border" value="#2d2d44">
+                                </div>
+                            </div>
+
+                            <div class="color-picker-group">
+                                <label>Успех</label>
+                                <div class="color-input-wrapper">
+                                    <input type="color" id="color-success" value="#00d26a">
+                                    <input type="text" class="color-text" data-for="color-success" value="#00d26a">
+                                </div>
+                            </div>
+
+                            <div class="color-picker-group">
+                                <label>Опасность</label>
+                                <div class="color-input-wrapper">
+                                    <input type="color" id="color-danger" value="#ff4757">
+                                    <input type="text" class="color-text" data-for="color-danger" value="#ff4757">
+                                </div>
+                            </div>
+
+                            <div class="color-picker-group">
+                                <label>Фон карточки</label>
+                                <div class="color-input-wrapper">
+                                    <input type="color" id="color-card-bg" value="#1e1e32">
+                                    <input type="text" class="color-text" data-for="color-card-bg" value="#1e1e32">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Правая панель - превью -->
+                    <div class="theme-preview">
+                        <h4>Предпросмотр</h4>
+                        <div class="preview-container" id="theme-preview-container">
+                            <div class="preview-sidebar">
+                                <div class="preview-avatar"></div>
+                                <div class="preview-menu-item active"></div>
+                                <div class="preview-menu-item"></div>
+                                <div class="preview-menu-item"></div>
+                            </div>
+                            <div class="preview-content">
+                                <div class="preview-header"></div>
+                                <div class="preview-cards">
+                                    <div class="preview-card">
+                                        <div class="preview-card-img"></div>
+                                        <div class="preview-card-info">
+                                            <div class="preview-card-title"></div>
+                                            <div class="preview-card-btn"></div>
+                                        </div>
+                                    </div>
+                                    <div class="preview-card">
+                                        <div class="preview-card-img"></div>
+                                        <div class="preview-card-info">
+                                            <div class="preview-card-title"></div>
+                                            <div class="preview-card-btn"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-danger" id="delete-theme-btn" style="display: none;">
+                    <i class="ri-delete-bin-line"></i> Удалить
+                </button>
+                <div class="modal-footer-right">
+                    <button class="btn btn-secondary" id="export-theme-btn">
+                        <i class="ri-download-line"></i> Экспорт
+                    </button>
+                    <button class="btn btn-secondary" id="cancel-theme-btn">Отмена</button>
+                    <button class="btn btn-primary" id="save-theme-btn">Сохранить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+        <!-- Модальное окно скачивания -->
+    <div class="modal-overlay" id="download-modal">
+        <div class="modal modal-download">
+            <div class="download-content">
+                <div class="download-game-cover">
+                    <img id="download-game-image" src="" alt="Game Cover">
+                </div>
+                <div class="download-info">
+                    <h2 id="download-game-title">Название игры</h2>
+                    <div class="download-status" id="download-status">Подготовка...</div>
+                    
+                    <div class="progress-container">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progress-fill"></div>
+                        </div>
+                        <div class="progress-text">
+                            <span id="progress-percent">0%</span>
+                            <span id="progress-size">0 MB / 0 MB</span>
+                        </div>
+                    </div>
+
+                    <div class="download-actions">
+                        <button class="btn btn-secondary" id="cancel-download-btn">
+                            <i class="ri-close-line"></i> Отмена
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно деталей игры -->
+    <div class="modal-overlay" id="game-detail-modal">
+        <div class="modal modal-game-detail">
+            <button class="modal-close modal-close-float" id="game-detail-close">
+                <i class="ri-close-line"></i>
+            </button>
+            
+            <div class="game-detail-header">
+                <img id="detail-game-cover" src="" alt="Cover">
+                <div class="game-detail-overlay"></div>
+                <div class="game-detail-info">
+                    <h1 id="detail-game-title">Название игры</h1>
+                    <div class="game-detail-meta">
+                        <span class="game-tag" id="detail-game-price">Бесплатно</span>
+                        <span class="game-tag"><i class="ri-windows-fill"></i> Windows</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="game-detail-body">
+                <p id="detail-game-description">Описание игры</p>
+                
+                <div class="game-detail-actions">
+                    <button class="btn btn-primary btn-large" id="detail-install-btn">
+                        <i class="ri-download-line"></i> Установить
+                    </button>
+                    <button class="btn btn-secondary btn-large" id="detail-add-library-btn">
+                        <i class="ri-bookmark-line"></i> В библиотеку
+                    </button>
+                    <button class="btn btn-success btn-large" id="detail-play-btn" style="display: none;">
+                        <i class="ri-play-fill"></i> Играть
+                    </button>
+                    <button class="btn btn-danger" id="detail-uninstall-btn" style="display: none;">
+                        <i class="ri-delete-bin-line"></i> Удалить
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+        <!-- Уведомление об обновлении -->
+    <div class="update-notification" id="update-notification">
+        <div class="update-content">
+            <div class="update-icon">
+                <i class="ri-download-cloud-line"></i>
+            </div>
+            <div class="update-info">
+                <h4 id="update-title">Доступно обновление!</h4>
+                <p id="update-message">Версия <span id="update-version">1.0.0</span> готова к загрузке</p>
+                
+                <!-- Прогресс бар (скрыт по умолчанию) -->
+                <div class="update-progress" id="update-progress" style="display: none;">
+                    <div class="update-progress-bar">
+                        <div class="update-progress-fill" id="update-progress-fill"></div>
+                    </div>
+                    <span class="update-progress-text" id="update-progress-text">0%</span>
+                </div>
+            </div>
+            <div class="update-actions">
+                <button class="btn btn-secondary btn-sm" id="update-later">Позже</button>
+                <button class="btn btn-primary btn-sm" id="update-download">
+                    <i class="ri-download-line"></i> Обновить
+                </button>
+                <button class="btn btn-success btn-sm" id="update-install" style="display: none;">
+                    <i class="ri-restart-line"></i> Перезапустить
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="renderer.js"></script>
+</body>
+</html>
