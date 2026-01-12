@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game Launcher</title>
+    <title>Swift Launcher</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
@@ -42,6 +42,7 @@
             </div>
 
             <!-- Навигация -->
+            <!-- Навигация -->
             <nav class="nav-menu">
                 <a href="#" class="nav-item active" data-section="store">
                     <i class="ri-store-2-fill"></i>
@@ -56,6 +57,11 @@
                     <span>Настройки</span>
                 </a>
             </nav>
+
+            <a href="#" class="nav-item" id="random-game-btn">
+                <i class="ri-dice-line"></i>
+                <span>Мне повезёт!</span>
+            </a>
 
             <!-- Нижняя часть сайдбара -->
             <div class="sidebar-footer">
@@ -74,6 +80,94 @@
                         <input type="text" placeholder="Поиск игр..." id="search-input">
                     </div>
                 </div>
+
+                    <!-- НОВОЕ: Панель фильтров -->
+                <div class="filters-bar">
+                    <div class="filter-group">
+                        <label>Сортировка:</label>
+                    </div>
+                    
+                    <!-- НОВОЕ: Панель фильтров -->
+                    <div class="filters-bar">
+                        <!-- Сортировка -->
+                        <div class="filter-group">
+                            <div class="custom-select" id="sort-dropdown">
+                                <div class="custom-select-trigger">
+                                    <span>По названию (А-Я)</span>
+                                    <i class="ri-arrow-down-s-line"></i>
+                                </div>
+                                <div class="custom-select-options">
+                                    <div class="custom-option active" data-value="name-asc">
+                                        <i class="ri-sort-asc"></i> По названию (А-Я)
+                                    </div>
+                                    <div class="custom-option" data-value="name-desc">
+                                        <i class="ri-sort-desc"></i> По названию (Я-А)
+                                    </div>
+                                    <div class="custom-option" data-value="size-asc">
+                                        <i class="ri-hard-drive-2-line"></i> По размеру (меньше)
+                                    </div>
+                                    <div class="custom-option" data-value="size-desc">
+                                        <i class="ri-hard-drive-2-fill"></i> По размеру (больше)
+                                    </div>
+                                    <div class="custom-option" data-value="sources-desc">
+                                        <i class="ri-database-2-line"></i> По кол-ву источников
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Источник -->
+                        <div class="filter-group">
+                            <div class="custom-select" id="source-dropdown">
+                                <div class="custom-select-trigger">
+                                    <i class="ri-database-2-line"></i>
+                                    <span>Все источники</span>
+                                    <i class="ri-arrow-down-s-line"></i>
+                                </div>
+                                <div class="custom-select-options" id="source-options">
+                                    <div class="custom-option active" data-value="all">
+                                        <i class="ri-apps-line"></i> Все источники
+                                    </div>
+                                    <!-- Заполнится динамически -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Статус -->
+                        <div class="filter-group">
+                            <div class="custom-select" id="status-dropdown">
+                                <div class="custom-select-trigger">
+                                    <i class="ri-filter-3-line"></i>
+                                    <span>Все игры</span>
+                                    <i class="ri-arrow-down-s-line"></i>
+                                </div>
+                                <div class="custom-select-options">
+                                    <div class="custom-option active" data-value="all">
+                                        <i class="ri-apps-line"></i> Все игры
+                                    </div>
+                                    <div class="custom-option" data-value="installed">
+                                        <i class="ri-checkbox-circle-fill"></i> Установленные
+                                    </div>
+                                    <div class="custom-option" data-value="not-installed">
+                                        <i class="ri-download-cloud-line"></i> Не установленные
+                                    </div>
+                                    <div class="custom-option" data-value="favorites">
+                                        <i class="ri-star-fill"></i> Избранные
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Переключатель вида -->
+                        <div class="filter-group view-toggles">
+                            <button class="view-btn active" id="view-list" title="Список">
+                                <i class="ri-list-check"></i>
+                            </button>
+                            <button class="view-btn" id="view-grid" title="Сетка">
+                                <i class="ri-grid-fill"></i>
+                            </button>
+                        </div>
+                    </div>
 
                 <!-- Статистика -->
                 <div class="store-stats">
@@ -200,6 +294,28 @@
                                 <i class="ri-refresh-line"></i> Проверить
                             </button>
                     </div>
+
+                    <div class="settings-group">
+                        <h3>Папка игр</h3>
+                        <div class="setting-item">
+                            <div class="setting-info">
+                            <span class="setting-label">Путь к играм</span>
+                            <span class="setting-desc" id="games-path">—</span>
+                            </div>
+                            <button class="setting-btn" id="change-path-btn">Изменить</button>
+                        </div>
+                    </div>
+
+                    <div class="settings-group">
+                        <h3><i class="ri-history-line"></i> История скачиваний</h3>
+                        <div id="download-history"></div>
+                        <button class="setting-btn" id="clear-history-btn" style="margin-top:10px;">Очистить</button>
+                    </div>
+
+                    <div class="settings-group">
+                        <h3><i class="ri-award-line"></i> Достижения</h3>
+                        <div id="achievements"></div>
+                    </div>
                 </div>
             </section>
         </main>
@@ -281,6 +397,11 @@
                         <h3 id="preview-game-name">Название игры</h3>
                         <p id="preview-game-path">Путь к игре</p>
                     </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Теги (через запятую)</label>
+                    <input type="text" id="edit-game-tags" placeholder="RPG, Action, Indie">
                 </div>
 
                 <div class="form-group">
@@ -571,7 +692,6 @@
             <button class="modal-close modal-close-float" id="game-detail-close">
                 <i class="ri-close-line"></i>
             </button>
-            
             <div class="game-detail-header">
                 <img id="detail-game-cover" src="" alt="Cover">
                 <div class="game-detail-overlay"></div>
@@ -586,7 +706,10 @@
             
             <div class="game-detail-body">
                 <p id="detail-game-description">Описание игры</p>
-                
+                <!-- НОВОЕ: Галерея -->
+                <div id="screenshots-container" class="screenshots-grid">
+                    <!-- Скриншоты появятся тут -->
+                </div>
                 <div class="game-detail-actions">
                     <button class="btn btn-primary btn-large" id="detail-install-btn">
                         <i class="ri-download-line"></i> Установить
@@ -600,6 +723,15 @@
                     <button class="btn btn-danger" id="detail-uninstall-btn" style="display: none;">
                         <i class="ri-delete-bin-line"></i> Удалить
                     </button>
+                </div>
+                <div class="game-detail-body">
+                    <!-- Описание и инфо (оно у тебя уже есть) -->
+                    <p id="detail-game-description">Описание игры</p>
+                                    
+                    <!-- Кнопки действий (они у тебя уже есть) -->
+                    <div class="game-detail-actions">
+                    <!-- ... твои кнопки ... -->
+                    </div>
                 </div>
             </div>
         </div>

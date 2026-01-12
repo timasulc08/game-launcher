@@ -1,3 +1,6 @@
+// Исправление ошибки "File is not defined"
+const { File } = require('node:buffer');
+global.File = File;
 const { app, BrowserWindow, ipcMain, dialog, shell } = require('electron');
 const path = require('path');
 const fs = require('fs');
@@ -5,28 +8,52 @@ const https = require('https');
 const http = require('http');
 const AdmZip = require('adm-zip');
 const { exec } = require('child_process');
+const google = require('googlethis');
 
 let mainWindow;
 let torrentClient = null;
+let runningGames = {}; // { gameId: { startTime, processName } }
 
 // Версия приложения
 const APP_VERSION = app.getVersion();
-
-// GitHub репозиторий для проверки обновлений
 const GITHUB_OWNER = 'timasulc08';
 const GITHUB_REPO = 'game-launcher';
 
 // Пути
+const settingsPath = path.join(app.getPath('userData'), 'settings.json');
 const themesPath = path.join(app.getPath('userData'), 'themes.json');
 const tempPath = path.join(app.getPath('temp'), 'GameLauncher');
-const gamesPath = 'C:\\Games';
-const gamesJsonPath = path.join(__dirname, 'games.json');
+const sourcesPath = path.join(__dirname, 'sources');
+const gamesNamesPath = path.join(__dirname, 'games-names.json');
+
+// Чтение настроек
+function readSettings() {
+  try {
+    if (fs.existsSync(settingsPath)) {
+      return JSON.parse(fs.readFileSync(settingsPath, 'utf8'));
+    }
+  } catch (e) {
+    console.error('readSettings error:', e);
+  }
+  return {};
+}
+
+function writeSettings(s) {
+  try {
+    fs.writeFileSync(settingsPath, JSON.stringify(s, null, 2), 'utf8');
+  } catch (e) {
+    console.error('writeSettings error:', e);
+  }
+}
+
+let settings = readSettings();
+let gamesPath = settings.gamesPath || 'C:\\Games';
 
 // Создаём папки
 if (!fs.existsSync(tempPath)) fs.mkdirSync(tempPath, { recursive: true });
 if (!fs.existsSync(gamesPath)) fs.mkdirSync(gamesPath, { recursive: true });
 
-// Ленивая загрузка WebTorrent (ESM модуль)
+// Ленивая загрузка WebTorrent
 async function getTorrentClient() {
     if (!torrentClient) {
         const WebTorrent = (await import('webtorrent')).default;
@@ -52,229 +79,107 @@ function createWindow() {
 
     mainWindow.loadFile('index.html');
 
-    // Проверяем обновления через 5 секунд после запуска
-    setTimeout(() => {
-        checkForUpdates();
-    }, 5000);
+    // Проверка обновлений
+    setTimeout(() => checkForUpdates(), 5000);
 }
 
 app.whenReady().then(createWindow);
 
 app.on('window-all-closed', () => {
-    if (torrentClient) {
-        torrentClient.destroy();
-    }
+    if (torrentClient) torrentClient.destroy();
     if (process.platform !== 'darwin') app.quit();
 });
 
-// ========== ПРОСТАЯ ПРОВЕРКА ОБНОВЛЕНИЙ ==========
+// ========== API ==========
 
-function checkForUpdates() {
-    const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/releases/latest`;
-    
-    const options = {
-        headers: {
-            'User-Agent': 'GameLauncher'
-        }
-    };
+// Настройки
+ipcMain.handle('get-settings', async () => readSettings());
 
-    https.get(url, options, (res) => {
-        let data = '';
-        
-        res.on('data', chunk => data += chunk);
-        
-        res.on('end', () => {
-            try {
-                const release = JSON.parse(data);
-                
-                if (release.message) {
-                    // Нет релизов или ошибка API
-                    console.log('Нет доступных релизов или ошибка:', release.message);
-                    return;
-                }
-                
-                // Убираем "v" из версии если есть (v1.0.1 -> 1.0.1)
-                const latestVersion = (release.tag_name || '').replace(/^v/, '');
-                
-                console.log(`Текущая версия: ${APP_VERSION}`);
-                console.log(`Последняя версия: ${latestVersion}`);
-                
-                if (isNewerVersion(latestVersion, APP_VERSION)) {
-                    // Ищем .exe файл в релизе
-                    const exeAsset = release.assets?.find(a => a.name.endsWith('.exe'));
-                    
-                    mainWindow.webContents.send('update-available', {
-                        currentVersion: APP_VERSION,
-                        newVersion: latestVersion,
-                        releaseNotes: release.body || 'Доступна новая версия!',
-                        downloadUrl: exeAsset ? exeAsset.browser_download_url : release.html_url,
-                        releasePage: release.html_url
-                    });
-                }
-            } catch (error) {
-                console.error('Ошибка парсинга ответа GitHub:', error);
-            }
-        });
-    }).on('error', (error) => {
-        console.error('Ошибка проверки обновлений:', error);
-    });
-}
+ipcMain.handle('set-games-path', async () => {
+  const result = await dialog.showOpenDialog(mainWindow, {
+    title: 'Выберите папку для игр',
+    properties: ['openDirectory', 'createDirectory']
+  });
 
-// Сравнение версий (1.0.1 > 1.0.0)
-function isNewerVersion(latest, current) {
-    if (!latest || !current) return false;
-    
-    const latestParts = latest.split('.').map(Number);
-    const currentParts = current.split('.').map(Number);
-    
-    for (let i = 0; i < Math.max(latestParts.length, currentParts.length); i++) {
-        const l = latestParts[i] || 0;
-        const c = currentParts[i] || 0;
-        
-        if (l > c) return true;
-        if (l < c) return false;
-    }
-    return false;
-}
+  if (result.canceled || !result.filePaths[0]) return null;
 
-// Ручная проверка обновлений
-ipcMain.on('check-for-updates', () => {
-    checkForUpdates();
+  const newPath = result.filePaths[0];
+  settings = readSettings();
+  settings.gamesPath = newPath;
+  writeSettings(settings);
+
+  gamesPath = newPath;
+  if (!fs.existsSync(gamesPath)) fs.mkdirSync(gamesPath, { recursive: true });
+
+  return gamesPath;
 });
 
-// Открыть ссылку в браузере
-ipcMain.on('open-download-link', (event, url) => {
-    shell.openExternal(url);
-});
+// Проверка файла
+ipcMain.handle('fs-exists', async (event, filePath) => fs.existsSync(filePath));
 
-// Получить текущую версию
-ipcMain.handle('get-app-version', () => {
-    return APP_VERSION;
-});
-
-// ========== УПРАВЛЕНИЕ ОКНОМ ==========
-
-ipcMain.on('minimize-window', () => mainWindow.minimize());
-ipcMain.on('maximize-window', () => {
-    mainWindow.isMaximized() ? mainWindow.unmaximize() : mainWindow.maximize();
-});
-ipcMain.on('close-window', () => mainWindow.close());
-
-// ========== ЗАПУСК ИГРЫ ==========
-
-ipcMain.on('launch-game', (event, command) => {
-    exec(command, (error) => {
-        if (error) {
-            event.reply('game-error', error.message);
-        }
-    });
-});
-
-// Открыть папку
-ipcMain.on('open-folder', (event, folderPath) => {
-    shell.openPath(folderPath);
-});
-
-// ========== ВЫБОР ФАЙЛОВ ==========
-
-ipcMain.handle('select-game-exe', async () => {
-    const result = await dialog.showOpenDialog(mainWindow, {
-        title: 'Выберите .exe файл игры',
-        filters: [
-            { name: 'Исполняемые файлы', extensions: ['exe'] },
-            { name: 'Все файлы', extensions: ['*'] }
-        ],
-        properties: ['openFile']
-    });
-    return result.canceled ? null : result.filePaths[0];
-});
-
-ipcMain.handle('select-image', async () => {
-    const result = await dialog.showOpenDialog(mainWindow, {
-        title: 'Выберите изображение',
-        filters: [
-            { name: 'Изображения', extensions: ['jpg', 'jpeg', 'png', 'gif', 'webp'] }
-        ],
-        properties: ['openFile']
-    });
-    return result.canceled ? null : result.filePaths[0];
-});
-
-// ========== ЗАГРУЗКА ИГР ИЗ JSON ==========
-
-ipcMain.handle('load-games-json', async () => {
+ipcMain.handle('load-games-names', async () => {
     try {
-        if (fs.existsSync(gamesJsonPath)) {
-            const data = fs.readFileSync(gamesJsonPath, 'utf8');
-            return JSON.parse(data);
+        if (fs.existsSync(gamesNamesPath)) {
+            return JSON.parse(fs.readFileSync(gamesNamesPath, 'utf8'));
         }
-    } catch (error) {
-        console.error('Ошибка загрузки games.json:', error);
-    }
+    } catch (e) {}
+    return {};
+});
+
+// Поиск обложек
+ipcMain.handle('search-game-cover', async (event, gameTitle) => {
+    try {
+        const options = { page: 0, safe: false };
+        const images = await google.image(`${gameTitle} game box art cover vertical`, options);
+        if (images && images.length > 0) return images[0].url;
+    } catch (e) { return null; }
     return null;
 });
 
-// ========== ТЕМЫ ==========
-
+// Темы
 ipcMain.handle('load-themes', async () => {
     try {
-        if (fs.existsSync(themesPath)) {
-            const data = fs.readFileSync(themesPath, 'utf8');
-            return JSON.parse(data);
-        }
-    } catch (error) {
-        console.error('Ошибка загрузки тем:', error);
-    }
+        if (fs.existsSync(themesPath)) return JSON.parse(fs.readFileSync(themesPath, 'utf8'));
+    } catch (e) {}
     return null;
 });
 
-ipcMain.handle('save-themes', async (event, themesData) => {
+ipcMain.handle('save-themes', async (event, data) => {
     try {
-        fs.writeFileSync(themesPath, JSON.stringify(themesData, null, 2), 'utf8');
+        fs.writeFileSync(themesPath, JSON.stringify(data, null, 2), 'utf8');
         return true;
-    } catch (error) {
-        return false;
-    }
+    } catch (e) { return false; }
 });
 
-ipcMain.handle('export-theme', async (event, theme) => {
-    const result = await dialog.showSaveDialog(mainWindow, {
-        title: 'Экспортировать тему',
-        defaultPath: `${theme.name}.json`,
-        filters: [{ name: 'JSON', extensions: ['json'] }]
-    });
-    if (result.canceled) return false;
+// Источники
+ipcMain.handle('load-all-sources', async () => {
+    const sources = [];
     try {
-        fs.writeFileSync(result.filePath, JSON.stringify(theme, null, 2), 'utf8');
-        return true;
-    } catch (error) {
-        return false;
-    }
+        if (!fs.existsSync(sourcesPath)) {
+            fs.mkdirSync(sourcesPath, { recursive: true });
+            return sources;
+        }
+        const files = fs.readdirSync(sourcesPath).filter(f => f.endsWith('.json'));
+        for (const file of files) {
+            try {
+                const data = fs.readFileSync(path.join(sourcesPath, file), 'utf8');
+                const parsed = JSON.parse(data);
+                sources.push({
+                    id: file.replace('.json', ''),
+                    name: parsed.name || file.replace('.json', ''),
+                    fileName: file,
+                    downloads: parsed.downloads || []
+                });
+            } catch (e) {}
+        }
+    } catch (e) {}
+    return sources;
 });
 
-ipcMain.handle('import-theme', async () => {
-    const result = await dialog.showOpenDialog(mainWindow, {
-        title: 'Импортировать тему',
-        filters: [{ name: 'JSON', extensions: ['json'] }],
-        properties: ['openFile']
-    });
-    if (result.canceled) return null;
-    try {
-        const data = fs.readFileSync(result.filePaths[0], 'utf8');
-        return JSON.parse(data);
-    } catch (error) {
-        return null;
-    }
-});
-
-// ========== ПРОВЕРКА УСТАНОВКИ ==========
-
-ipcMain.handle('get-games-path', async () => gamesPath);
-
+// Установка и запуск
 ipcMain.handle('check-game-installed', async (event, gameFolderName, exeName) => {
     const gamePath = path.join(gamesPath, gameFolderName);
     const exePath = exeName ? path.join(gamePath, exeName) : findExeFile(gamePath);
-    
     return {
         installed: exePath ? fs.existsSync(exePath) : fs.existsSync(gamePath),
         path: exePath,
@@ -282,8 +187,28 @@ ipcMain.handle('check-game-installed', async (event, gameFolderName, exeName) =>
     };
 });
 
-// ========== СКАЧИВАНИЕ ТОРРЕНТОВ ==========
+ipcMain.on('launch-game', (event, data) => {
+    const { command, gameId } = typeof data === 'string' ? { command: data, gameId: null } : data;
+    const cleanPath = command.replace(/"/g, '');
+    const gameDir = path.dirname(cleanPath);
+    const exeName = path.basename(cleanPath);
 
+    const startTime = Date.now();
+    const process = exec(`"${exeName}"`, { cwd: gameDir }, (error) => {
+        if (error) event.reply('game-error', error.message);
+    });
+
+    if (gameId) {
+        runningGames[gameId] = { startTime, process };
+        process.on('exit', () => {
+            const playTime = Math.floor((Date.now() - startTime) / 60000);
+            delete runningGames[gameId];
+            event.reply('game-closed', { gameId, playTime });
+        });
+    }
+});
+
+// Скачивание
 let activeTorrents = {};
 
 ipcMain.on('download-torrent', async (event, gameData) => {
@@ -292,74 +217,43 @@ ipcMain.on('download-torrent', async (event, gameData) => {
 
     try {
         const client = await getTorrentClient();
-
         if (activeTorrents[gameId]) {
-            event.reply('download-error', 'Эта игра уже скачивается');
-            return;
+            return event.reply('download-error', 'Уже скачивается');
         }
 
-        event.reply('download-progress', {
-            gameId,
-            progress: 0,
-            status: 'connecting',
-            message: 'Подключение к пирам...'
-        });
+        event.reply('download-progress', { gameId, progress: 0, status: 'connecting' });
 
         const torrent = client.add(magnetUri, { path: downloadPath }, (torrent) => {
-            console.log('Торрент начал скачивание:', torrent.name);
+            console.log('Torrent started:', torrent.name);
         });
 
         activeTorrents[gameId] = torrent;
 
-        torrent.on('metadata', () => {
-            event.reply('download-progress', {
-                gameId,
-                progress: 0,
-                status: 'downloading',
-                message: 'Скачивание...',
-                totalSize: (torrent.length / 1024 / 1024 / 1024).toFixed(2) + ' GB'
-            });
-        });
-
         torrent.on('download', () => {
-            const progress = Math.round(torrent.progress * 100);
-            const downloaded = (torrent.downloaded / 1024 / 1024).toFixed(1);
-            const total = (torrent.length / 1024 / 1024).toFixed(1);
-            const speed = (torrent.downloadSpeed / 1024 / 1024).toFixed(2);
-            const peers = torrent.numPeers;
-
             event.reply('download-progress', {
                 gameId,
-                progress,
+                progress: Math.round(torrent.progress * 100),
                 status: 'downloading',
-                downloadedMB: downloaded,
-                totalMB: total,
-                speed: speed + ' MB/s',
-                peers,
+                downloadedMB: (torrent.downloaded / 1024 / 1024).toFixed(1),
+                totalMB: (torrent.length / 1024 / 1024).toFixed(1),
+                speed: (torrent.downloadSpeed / 1024 / 1024).toFixed(2) + ' MB/s',
+                peers: torrent.numPeers,
                 eta: formatETA(torrent.timeRemaining)
             });
         });
 
         torrent.on('done', () => {
             delete activeTorrents[gameId];
-            
             const exePath = findExeFile(downloadPath);
-            
-            event.reply('download-complete', {
-                gameId,
-                success: true,
-                gamePath: downloadPath,
-                exePath: exePath
-            });
+            event.reply('download-complete', { gameId, success: true, gamePath: downloadPath, exePath });
         });
 
         torrent.on('error', (err) => {
             delete activeTorrents[gameId];
             event.reply('download-error', err.message);
         });
-
-    } catch (error) {
-        event.reply('download-error', error.message);
+    } catch (e) {
+        event.reply('download-error', e.message);
     }
 });
 
@@ -371,22 +265,7 @@ ipcMain.on('cancel-download', (event, gameId) => {
     }
 });
 
-ipcMain.on('pause-download', (event, gameId) => {
-    if (activeTorrents[gameId]) {
-        activeTorrents[gameId].pause();
-        event.reply('download-paused', gameId);
-    }
-});
-
-ipcMain.on('resume-download', (event, gameId) => {
-    if (activeTorrents[gameId]) {
-        activeTorrents[gameId].resume();
-        event.reply('download-resumed', gameId);
-    }
-});
-
-// ========== HTTP СКАЧИВАНИЕ ==========
-
+// HTTP Скачивание
 ipcMain.on('download-game', (event, gameData) => {
     const { url, fileName, gameFolderName } = gameData;
     const zipPath = path.join(tempPath, fileName);
@@ -394,16 +273,12 @@ ipcMain.on('download-game', (event, gameData) => {
 
     const downloadFile = (downloadUrl, destination) => {
         const protocol = downloadUrl.startsWith('https') ? https : http;
-        
         const request = protocol.get(downloadUrl, (response) => {
-            if (response.statusCode === 301 || response.statusCode === 302) {
-                downloadFile(response.headers.location, destination);
-                return;
+            if (response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
+                return downloadFile(response.headers.location, destination);
             }
-
             if (response.statusCode !== 200) {
-                event.reply('download-error', `Ошибка: ${response.statusCode}`);
-                return;
+                return event.reply('download-error', `HTTP Error: ${response.statusCode}`);
             }
 
             const totalSize = parseInt(response.headers['content-length'], 10);
@@ -426,84 +301,128 @@ ipcMain.on('download-game', (event, gameData) => {
             file.on('finish', () => {
                 file.close();
                 event.reply('download-progress', { progress: 100, status: 'extracting' });
-
                 try {
-                    if (!fs.existsSync(extractPath)) {
-                        fs.mkdirSync(extractPath, { recursive: true });
-                    }
+                    if (!fs.existsSync(extractPath)) fs.mkdirSync(extractPath, { recursive: true });
                     const zip = new AdmZip(destination);
                     zip.extractAllTo(extractPath, true);
                     fs.unlinkSync(destination);
-
-                    event.reply('download-complete', {
-                        success: true,
-                        gamePath: extractPath,
-                        exePath: findExeFile(extractPath)
-                    });
-                } catch (error) {
-                    event.reply('download-error', `Ошибка распаковки: ${error.message}`);
+                    event.reply('download-complete', { success: true, gamePath: extractPath, exePath: findExeFile(extractPath) });
+                } catch (e) {
+                    event.reply('download-error', `Extract error: ${e.message}`);
                 }
             });
         });
-
-        request.on('error', (error) => {
-            event.reply('download-error', error.message);
-        });
+        request.on('error', (e) => event.reply('download-error', e.message));
     };
-
     downloadFile(url, zipPath);
 });
 
-// ========== УДАЛЕНИЕ ==========
-
-ipcMain.handle('uninstall-game', async (event, gameFolderPath) => {
+ipcMain.handle('uninstall-game', async (event, p) => {
     try {
-        if (fs.existsSync(gameFolderPath)) {
-            fs.rmSync(gameFolderPath, { recursive: true, force: true });
+        if (fs.existsSync(p)) {
+            fs.rmSync(p, { recursive: true, force: true });
             return { success: true };
         }
-        return { success: false, error: 'Папка не найдена' };
-    } catch (error) {
-        return { success: false, error: error.message };
-    }
+        return { success: false, error: 'Path not found' };
+    } catch (e) { return { success: false, error: e.message }; }
 });
 
-// ========== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ==========
+ipcMain.handle('select-game-exe', async () => {
+    const res = await dialog.showOpenDialog(mainWindow, { filters: [{ name: 'EXE', extensions: ['exe'] }] });
+    return res.canceled ? null : res.filePaths[0];
+});
+
+ipcMain.handle('select-image', async () => {
+    const res = await dialog.showOpenDialog(mainWindow, { filters: [{ name: 'Images', extensions: ['jpg', 'png', 'webp'] }] });
+    return res.canceled ? null : res.filePaths[0];
+});
+
+ipcMain.handle('get-app-version', () => APP_VERSION);
+
+// Управление окном
+ipcMain.on('minimize-window', () => mainWindow.minimize());
+ipcMain.on('maximize-window', () => mainWindow.isMaximized() ? mainWindow.unmaximize() : mainWindow.maximize());
+ipcMain.on('close-window', () => mainWindow.close());
+ipcMain.on('open-folder', (e, p) => shell.openPath(p));
+ipcMain.on('open-download-link', (e, url) => shell.openExternal(url));
+ipcMain.on('check-for-updates', () => checkForUpdates());
+
+// Обновления
+function checkForUpdates() {
+    const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/releases/latest`;
+    https.get(url, { headers: { 'User-Agent': 'GameLauncher' } }, (res) => {
+        let data = '';
+        res.on('data', c => data += c);
+        res.on('end', () => {
+            try {
+                const release = JSON.parse(data);
+                const latest = (release.tag_name || '').replace(/^v/, '');
+                if (latest && isNewerVersion(latest, APP_VERSION)) {
+                    const exe = release.assets?.find(a => a.name.endsWith('.exe'));
+                    mainWindow.webContents.send('update-available', {
+                        currentVersion: APP_VERSION,
+                        newVersion: latest,
+                        downloadUrl: exe ? exe.browser_download_url : release.html_url
+                    });
+                }
+            } catch (e) {}
+        });
+    });
+}
+
+function isNewerVersion(latest, current) {
+    const l = latest.split('.').map(Number);
+    const c = current.split('.').map(Number);
+    for (let i = 0; i < Math.max(l.length, c.length); i++) {
+        if ((l[i] || 0) > (c[i] || 0)) return true;
+        if ((l[i] || 0) < (c[i] || 0)) return false;
+    }
+    return false;
+}
 
 function findExeFile(folderPath) {
     if (!fs.existsSync(folderPath)) return null;
-    
     try {
         const files = fs.readdirSync(folderPath);
-        
         for (const file of files) {
             const fullPath = path.join(folderPath, file);
             const stat = fs.statSync(fullPath);
-            
             if (stat.isDirectory()) {
                 const found = findExeFile(fullPath);
                 if (found) return found;
-            } else if (file.endsWith('.exe') && 
-                       !file.toLowerCase().includes('uninstall') && 
-                       !file.toLowerCase().includes('redist') &&
-                       !file.toLowerCase().includes('vcredist') &&
-                       !file.toLowerCase().includes('dxsetup')) {
+            } else if (file.endsWith('.exe') && !file.toLowerCase().includes('uninstall') && !file.toLowerCase().includes('dxsetup')) {
                 return fullPath;
             }
         }
-    } catch (error) {
-        console.error('Ошибка поиска exe:', error);
-    }
+    } catch (e) {}
     return null;
 }
 
 function formatETA(ms) {
     if (!ms || ms === Infinity) return '∞';
-    const seconds = Math.floor(ms / 1000);
-    const minutes = Math.floor(seconds / 60);
-    const hours = Math.floor(minutes / 60);
-    
-    if (hours > 0) return `${hours}ч ${minutes % 60}м`;
-    if (minutes > 0) return `${minutes}м ${seconds % 60}с`;
-    return `${seconds}с`;
+    const s = Math.floor(ms / 1000);
+    const m = Math.floor(s / 60);
+    const h = Math.floor(m / 60);
+    if (h > 0) return `${h}ч ${m % 60}м`;
+    return `${m}м ${s % 60}с`;
 }
+
+// ========== ПОИСК СКРИНШОТОВ ==========
+ipcMain.handle('get-game-screenshots', async (event, gameTitle) => {
+    try {
+        // Ищем картинки с запросом "gameplay"
+        const results = await google.image(`${gameTitle} gameplay screenshot hd`, { 
+            page: 0, 
+            safe: false 
+        });
+        
+        // Возвращаем первые 4 картинки
+        if (results && results.length > 0) {
+            return results.slice(0, 4).map(img => img.url);
+        }
+    } catch (error) {
+        console.error('Ошибка поиска скриншотов:', error);
+    }
+    return [];
+});
+

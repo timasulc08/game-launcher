@@ -278,60 +278,6 @@ body {
     color: var(--text-primary);
 }
 
-/* Сетка игр */
-.games-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 20px;
-}
-
-.game-card {
-    background: var(--card-bg);
-    border-radius: 12px;
-    overflow: hidden;
-    transition: all 0.3s;
-    cursor: pointer;
-    border: 1px solid var(--border);
-}
-
-.game-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-    border-color: var(--accent);
-}
-
-.game-cover {
-    width: 100%;
-    height: 250px;
-    object-fit: cover;
-    background: var(--bg-tertiary);
-}
-
-.game-info {
-    padding: 15px;
-}
-
-.game-title {
-    font-size: 14px;
-    font-weight: 600;
-    margin-bottom: 8px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.game-meta {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.game-price {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--success);
-}
-
 .play-btn {
     background: var(--accent);
     border: none;
@@ -682,86 +628,10 @@ body {
 ::-webkit-scrollbar-thumb:hover {
     background: var(--accent);
 }
-/* Карточка добавления игры */
-.add-game-card {
-    background: var(--bg-tertiary);
-    border: 2px dashed var(--border);
-    border-radius: 12px;
-    min-height: 320px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.add-game-card:hover {
-    border-color: var(--accent);
-    background: rgba(108, 92, 231, 0.1);
-    transform: translateY(-5px);
-    box-shadow: 0 10px 30px rgba(108, 92, 231, 0.2);
-}
-
-.add-game-card:hover .add-game-content i {
-    transform: scale(1.2);
-    color: var(--accent);
-}
-
-.add-game-card:hover .add-game-content span {
-    color: var(--accent);
-}
-
-.add-game-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 15px;
-}
-
-.add-game-content i {
-    font-size: 60px;
-    color: var(--text-muted);
-    transition: all 0.3s ease;
-}
-
-.add-game-content span {
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--text-muted);
-    transition: all 0.3s ease;
-}
-
-/* Кнопка удаления игры */
-.delete-game-btn {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    background: rgba(255, 71, 87, 0.9);
-    border: none;
-    color: white;
-    cursor: pointer;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    font-size: 16px;
-    transition: all 0.2s;
-    z-index: 10;
-}
-
-.game-card:hover .delete-game-btn {
-    display: flex;
-}
 
 .delete-game-btn:hover {
     background: var(--danger);
     transform: scale(1.1);
-}
-
-.game-card {
-    position: relative;
 }
 
 /* ========== КОНТЕКСТНОЕ МЕНЮ ========== */
@@ -1505,7 +1375,7 @@ body {
     position: absolute;
     top: 15px;
     right: 15px;
-    z-index: 10;
+    z-index: 1000; /* Было 10, ставим 1000 чтобы наверняка */
     width: 40px;
     height: 40px;
     border-radius: 50%;
@@ -1514,10 +1384,15 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+    border: none;
+    color: white;
+    cursor: pointer; /* Важно */
+    transition: all 0.2s;
 }
 
 .modal-close-float:hover {
     background: var(--danger);
+    transform: scale(1.1);
 }
 
 .game-detail-header {
@@ -1603,24 +1478,6 @@ body {
     box-shadow: 0 4px 15px rgba(0, 210, 106, 0.3);
 }
 
-/* ========== КАРТОЧКИ ИГР В МАГАЗИНЕ ========== */
-.game-card {
-    position: relative;
-    cursor: pointer;
-}
-
-.game-card .game-status {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    padding: 5px 10px;
-    border-radius: 6px;
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    z-index: 5;
-}
-
 .game-status.installed {
     background: var(--success);
     color: white;
@@ -1692,41 +1549,6 @@ body {
     transform: translateY(-5px);
     transition: all 0.25s ease;
     z-index: 5;
-}
-
-.game-playtime i {
-    font-size: 13px;
-    color: var(--accent);
-}
-
-.game-card:hover .game-playtime {
-    opacity: 1;
-    transform: translateY(0);
-}
-
-/* Разные цвета в зависимости от времени */
-.game-playtime.no-time {
-    background: rgba(108, 108, 128, 0.6);
-}
-
-.game-playtime.low-time i {
-    color: #a0a0b0;
-}
-
-.game-playtime.medium-time i {
-    color: #ffd93d;
-}
-
-.game-playtime.high-time i {
-    color: #00d26a;
-}
-
-.game-playtime.ultra-time {
-    background: linear-gradient(135deg, rgba(108, 92, 231, 0.7), rgba(162, 155, 254, 0.7));
-}
-
-.game-playtime.ultra-time i {
-    color: white;
 }
 
 /* ========== СТАТИСТИКА МАГАЗИНА ========== */
@@ -1872,13 +1694,6 @@ body {
 .torrent-stat .value {
     color: var(--text-primary);
     font-weight: 600;
-}
-
-/* ========== РАЗМЕР ФАЙЛА ========== */
-.game-size {
-    font-size: 11px;
-    color: var(--text-muted);
-    margin-top: 4px;
 }
 
 /* ========== УВЕДОМЛЕНИЯ ========== */
@@ -2078,4 +1893,828 @@ body {
 .btn-sm {
     padding: 8px 16px;
     font-size: 13px;
+}
+
+.source-options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.source-option {
+    padding: 12px 15px;
+    background: var(--bg-secondary);
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.source-option:hover {
+    border-color: var(--accent);
+    background: rgba(108, 92, 231, 0.1);
+}
+
+.source-option.active {
+    border-color: var(--accent);
+    background: rgba(108, 92, 231, 0.15);
+    box-shadow: 0 0 15px rgba(108, 92, 231, 0.2);
+}
+
+.source-option-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.source-name {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--text-primary);
+}
+
+.source-size {
+    font-size: 12px;
+    color: var(--accent);
+    font-weight: 500;
+}
+
+.source-option-info {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.source-option.active .source-name {
+    color: var(--accent);
+}
+
+/* Иконка активного источника */
+.source-option.active::before {
+    content: '✓';
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--accent);
+    font-weight: bold;
+}
+
+.source-option {
+    position: relative;
+}
+
+/* ========== ДЕТАЛИ ИГРЫ ========== */
+.game-details-info {
+    margin-top: 15px;
+}
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.detail-row:last-child {
+    border-bottom: none;
+}
+
+.detail-label {
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.detail-value {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.source-badge {
+    background: var(--bg-tertiary);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    color: var(--accent);
+}
+
+/* ========== КНОПКА С ИСТОЧНИКОМ ========== */
+.btn-source {
+    font-size: 11px;
+    opacity: 0.7;
+    font-weight: 400;
+    margin-left: 5px;
+}
+
+#detail-install-btn {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+/* ========== ИСТОЧНИК В КАРТОЧКЕ ========== */
+.game-source {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    color: var(--text-muted);
+    background: var(--bg-tertiary);
+    padding: 4px 10px;
+    border-radius: 20px;
+    white-space: nowrap;
+}
+
+.game-source i {
+    font-size: 12px;
+    color: var(--accent);
+}
+
+/* ========== ВЫБОР ИСТОЧНИКА ========== */
+.source-selector {
+    margin-bottom: 20px;
+    padding: 15px;
+    background: var(--bg-tertiary);
+    border-radius: 12px;
+}
+
+.source-selector label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+}
+
+.source-selector label i {
+    color: var(--accent);
+}
+
+.source-options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.source-option {
+    padding: 12px 15px;
+    background: var(--bg-secondary);
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+}
+
+.source-option:hover {
+    border-color: var(--accent);
+    background: rgba(108, 92, 231, 0.1);
+}
+
+.source-option.active {
+    border-color: var(--accent);
+    background: rgba(108, 92, 231, 0.15);
+    box-shadow: 0 0 15px rgba(108, 92, 231, 0.2);
+}
+
+.source-option.active::after {
+    content: '✓';
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--accent);
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.source-option-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.source-name {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--text-primary);
+}
+
+.source-size {
+    font-size: 12px;
+    color: var(--accent);
+    font-weight: 500;
+}
+
+.source-option-info {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.source-option.active .source-name {
+    color: var(--accent);
+}
+
+/* ========== НЕ УСТАНОВЛЕНО ========== */
+.not-installed-badge {
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    background: var(--bg-tertiary);
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+}
+
+.game-card.not-installed {
+    opacity: 0.85;
+}
+
+.game-card.not-installed:hover {
+    opacity: 1;
+}
+
+/* ========== СЕТКА ИГР (СПИСКОМ) ========== */
+.games-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* ========== КАРТОЧКА ИГРЫ (ГОРИЗОНТАЛЬНАЯ) ========== */
+.game-card {
+    display: flex;
+    align-items: center;
+    background: var(--card-bg);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.3s;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    padding: 12px;
+    gap: 15px;
+    position: relative;
+}
+
+.game-card:hover {
+    transform: translateX(5px);
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.3);
+    border-color: var(--accent);
+}
+
+.game-cover {
+    display: none; /* На всякий случай скрываем, если где-то осталась */
+}
+.game-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 0;
+}
+
+.game-title {
+    font-size: 16px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--text-primary);
+}
+
+.game-meta {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.game-size {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.game-price {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.game-price.free {
+    color: var(--success) !important;
+}
+
+/* Источник игры */
+.game-source {
+    font-size: 11px;
+    color: var(--text-muted);
+    background: var(--bg-tertiary);
+    padding: 4px 10px;
+    border-radius: 20px;
+    white-space: nowrap;
+}
+
+/* Статусы */
+.game-card .game-status {
+    position: static;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.game-status.installed {
+    background: var(--success);
+    color: white;
+}
+
+.game-status.free {
+    background: var(--accent);
+    color: white;
+}
+
+.game-status.sources {
+    background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+    color: white;
+}
+
+/* Правая часть карточки */
+.game-card-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: auto;
+}
+
+/* Tooltip при наведении */
+.game-card[data-tooltip]:hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 12px;
+    white-space: nowrap;
+    z-index: 100;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+    animation: tooltipIn 0.2s ease;
+}
+
+@keyframes tooltipIn {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+/* ========== КНОПКА ДОБАВЛЕНИЯ (ГОРИЗОНТАЛЬНАЯ) ========== */
+.add-game-card {
+    justify-content: center;
+    border: 2px dashed var(--border);
+    background: transparent;
+    min-height: 80px;
+}
+
+.add-game-card:hover {
+    border-color: var(--accent);
+    background: rgba(108, 92, 231, 0.1);
+}
+
+.add-game-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--text-muted);
+}
+
+.add-game-content i {
+    font-size: 28px;
+}
+
+.add-game-content span {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.add-game-card:hover .add-game-content {
+    color: var(--accent);
+}
+
+.game-playtime i {
+    font-size: 12px;
+    color: var(--accent);
+}
+
+/* ========== КНОПКА ИГРАТЬ ========== */
+.play-btn {
+    background: var(--accent);
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+
+.play-btn:hover {
+    background: var(--accent-hover);
+    transform: scale(1.05);
+}
+
+.install-btn {
+    background: var(--success) !important;
+}
+
+.install-btn:hover {
+    background: #00b85c !important;
+}
+
+.filter-group select:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+
+.view-toggle {
+    width: 40px;
+    height: 40px;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    transition: all 0.2s;
+}
+
+.view-toggle:hover {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+}
+
+.view-toggle.grid-view i::before {
+    content: "\eb87"; /* ri-grid-fill */
+}
+
+/* ========== КНОПКА ИЗБРАННОГО ========== */
+.favorite-btn {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 32px;
+    height: 32px;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    transition: all 0.2s;
+    z-index: 5;
+    opacity: 0;
+}
+
+.game-card:hover .favorite-btn {
+    opacity: 1;
+}
+
+.favorite-btn:hover {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+}
+
+.favorite-btn.active {
+    background: #ffd93d;
+    color: #1a1a2e;
+    border-color: #ffd93d;
+    opacity: 1;
+}
+
+.favorite-btn.active:hover {
+    background: #ffcc00;
+}
+
+/* Сдвигаем обложку чтобы кнопка поместилась */
+.game-card {
+    padding-left: 55px;
+}
+
+/* ========== ВИД СЕТКОЙ ========== */
+.games-grid.grid-view {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 15px;
+}
+
+.games-grid.grid-view .game-card {
+    flex-direction: column;
+    padding: 0;
+    padding-bottom: 12px;
+}
+
+.games-grid.grid-view .game-cover {
+    width: 100%;
+    height: 200px;
+    border-radius: 12px 12px 0 0;
+}
+
+.games-grid.grid-view .game-info {
+    padding: 12px;
+    padding-bottom: 0;
+}
+
+.games-grid.grid-view .game-card-right {
+    padding: 0 12px;
+    margin-left: 0;
+    margin-top: 8px;
+    justify-content: flex-start;
+}
+
+.games-grid.grid-view .favorite-btn {
+    left: auto;
+    right: 10px;
+    top: 10px;
+    transform: none;
+    opacity: 0;
+}
+
+.games-grid.grid-view .game-card:hover .favorite-btn {
+    opacity: 1;
+}
+
+.games-grid.grid-view .game-card {
+    padding-left: 0;
+}
+
+/* ========== ПАНЕЛЬ ФИЛЬТРОВ ========== */
+.filters-bar {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px 20px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.filter-group {
+    position: relative;
+}
+
+/* ========== КАСТОМНЫЙ SELECT ========== */
+.custom-select {
+    position: relative;
+    min-width: 180px;
+}
+
+.custom-select-trigger {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 15px;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    user-select: none;
+}
+
+.custom-select-trigger:hover {
+    border-color: var(--accent);
+}
+
+.custom-select.open .custom-select-trigger {
+    border-color: var(--accent);
+    background: var(--bg-primary);
+}
+
+.custom-select-trigger span {
+    flex: 1;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.custom-select-trigger i:first-child {
+    font-size: 16px;
+    color: var(--accent);
+}
+
+.custom-select-trigger i:last-child {
+    font-size: 18px;
+    color: var(--text-muted);
+    transition: transform 0.2s;
+}
+
+.custom-select.open .custom-select-trigger i:last-child {
+    transform: rotate(180deg);
+}
+
+/* Выпадающий список */
+.custom-select-options {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    right: 0;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 8px;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.2s ease;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.custom-select.open .custom-select-options {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+/* Опция */
+.custom-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--text-secondary);
+    transition: all 0.15s;
+}
+
+.custom-option:hover {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+.custom-option.active {
+    background: rgba(108, 92, 231, 0.15);
+    color: var(--accent);
+}
+
+.custom-option i {
+    font-size: 16px;
+    width: 20px;
+    text-align: center;
+}
+
+.custom-option.active i {
+    color: var(--accent);
+}
+
+/* Разделитель в списке */
+.custom-option-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 8px 0;
+}
+
+/* ========== ПЕРЕКЛЮЧАТЕЛИ ВИДА ========== */
+.view-toggles {
+    display: flex;
+    gap: 5px;
+    margin-left: auto;
+    background: var(--bg-tertiary);
+    padding: 5px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+}
+
+.view-btn {
+    width: 36px;
+    height: 36px;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    transition: all 0.2s;
+}
+
+.view-btn:hover {
+    color: var(--text-primary);
+    background: var(--bg-secondary);
+}
+
+.view-btn.active {
+    background: var(--accent);
+    color: white;
+}
+
+/* ========== СКРОЛЛБАР ДЛЯ ОПЦИЙ ========== */
+.custom-select-options::-webkit-scrollbar {
+    width: 6px;
+}
+
+.custom-select-options::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.custom-select-options::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 3px;
+}
+
+.custom-select-options::-webkit-scrollbar-thumb:hover {
+    background: var(--accent);
+}
+
+.tags-row { display:flex; gap:6px; flex-wrap:wrap; margin-top: 6px; }
+.tag-chip{
+  font-size:11px;
+  padding:3px 8px;
+  border-radius:999px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+}
+
+/* ========== ГАЛЕРЕЯ СКРИНШОТОВ ========== */
+.screenshots-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* 2 колонки */
+    gap: 10px;
+    margin-bottom: 20px;
+    margin-top: 15px;
+}
+
+.screenshot-item {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: transform 0.2s, border-color 0.2s;
+    background: var(--bg-primary);
+}
+
+.screenshot-item:hover {
+    transform: scale(1.03);
+    border-color: var(--accent);
+    z-index: 2;
+}
+
+/* Анимация появления */
+.screenshot-item {
+    animation: fadeIn 0.5s ease;
+}
+
+/* ===== LAYOUT FIX (последним, чтобы перебило всё) ===== */
+.app-container { width: 100%; }
+.main-content { flex: 1; width: 100%; min-width: 0; }
+
+.filters-bar { width: 100%; box-sizing: border-box; }
+
+.games-grid { width: 100%; box-sizing: border-box; }
+.game-card {
+    /* ... твои старые стили ... */
+    min-height: 60px; /* Делаем карточку чуть ниже, раз нет большой картинки */
 }
