@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <!-- Исправление для загрузки картинок с внешних сайтов -->
+    <meta name="referrer" content="no-referrer"> 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Swift Launcher</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+</head>
+<body>
+    <!-- ЗАГОЛОВОК -->
+    <div class="title-bar">
+        <button class="title-btn" id="minimize-btn"><i class="ri-subtract-line"></i></button>
+        <button class="title-btn" id="maximize-btn"><i class="ri-checkbox-blank-line"></i></button>
+        <button class="title-btn close-btn" id="close-btn"><i class="ri-close-line"></i></button>
+    </div>
+
+    <div class="app-container">
+        <!-- САЙДБАР -->
+        <aside class="sidebar">
+            <div class="app-logo">
+                <i class="ri-planet-fill"></i>
+                <span>SWIFT</span>
+            </div>
+
+            <div class="profile-section">
+                <div class="avatar" id="user-avatar">
+                    <i class="ri-user-fill"></i>
+                </div>
+                <div class="profile-info">
+                    <span class="username" id="user-name">Гость</span>
+                    <button class="login-btn" id="login-btn">Войти</button>
+                </div>
+            </div>
+
+            <nav class="nav-menu">
+                <a href="#" class="nav-item active" data-section="store">
+                    <i class="ri-store-2-fill"></i> <span>Магазин</span>
+                </a>
+                <a href="#" class="nav-item" data-section="library">
+                    <i class="ri-gamepad-fill"></i> <span>Библиотека</span>
+                </a>
+                <a href="#" class="nav-item" data-section="downloads">
+                    <i class="ri-download-cloud-2-line"></i> <span>Загрузки</span>
+                    <span id="nav-download-badge" class="nav-badge" style="display:none">1</span>
+                </a>
+                <a href="#" class="nav-item" data-section="community">
+                    <i class="ri-global-line"></i> <span>Сообщество</span>
+                </a>
+                <a href="#" class="nav-item" id="random-game-btn">
+                    <i class="ri-dice-line"></i> <span>Мне повезёт!</span>
+                </a>
+                <a href="#" class="nav-item" data-section="settings" style="margin-top: auto;">
+                    <i class="ri-settings-3-fill"></i> <span>Настройки</span>
+                </a>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="version">v1.0.1</div>
+            </div>
+        </aside>
+
+        <!-- КОНТЕНТ -->
+        <main class="main-content">
+            <div class="content-header">
+                <div class="page-title">Магазин</div>
+                <div class="header-controls">
+                    <div class="search-container">
+                        <i class="ri-search-line"></i>
+                        <input type="text" id="search-input" placeholder="Поиск...">
+                        <button class="search-clear" id="search-clear" style="display: none;">
+                            <i class="ri-close-line"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 1. МАГАЗИН -->
+            <section class="content-section active" id="store">
+                <div class="hero-banner" id="hero-banner">
+                    <div class="hero-overlay">
+                        <div class="hero-tag">Рекомендуем</div>
+                        <h1 class="hero-title" id="hero-title">Loading...</h1>
+                        <p class="hero-desc" id="hero-desc">...</p>
+                        <button class="hero-btn" id="hero-btn">
+                            <i class="ri-eye-fill"></i> ПОДРОБНЕЕ
+                        </button>
+                    </div>
+                </div>
+
+                <div class="filters-bar">
+                    <!-- Сортировка -->
+                    <div class="filter-group">
+                        <div class="custom-select" id="sort-dropdown">
+                            <div class="custom-select-trigger"><span>По названию (А-Я)</span><i class="ri-arrow-down-s-line"></i></div>
+                            <div class="custom-select-options">
+                                <div class="custom-option active" data-value="name-asc">По названию (А-Я)</div>
+                                <div class="custom-option" data-value="name-desc">По названию (Я-А)</div>
+                                <div class="custom-option" data-value="size-asc">По размеру (меньше)</div>
+                                <div class="custom-option" data-value="size-desc">По размеру (больше)</div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Источник -->
+                    <div class="filter-group">
+                        <div class="custom-select" id="source-dropdown">
+                            <div class="custom-select-trigger"><i class="ri-database-2-line"></i><span>Все источники</span><i class="ri-arrow-down-s-line"></i></div>
+                            <div class="custom-select-options" id="source-options"></div>
+                        </div>
+                    </div>
+                    <!-- Вид -->
+                    <div class="filter-group view-toggles">
+                        <button class="view-btn active" id="view-list"><i class="ri-list-check"></i></button>
+                        <button class="view-btn" id="view-grid"><i class="ri-grid-fill"></i></button>
+                    </div>
+                </div>
+
+                <div class="section-bar"><div class="section-title">Каталог</div></div>
+                <div class="games-grid" id="store-games"></div>
+                <div class="pagination" id="pagination"></div>
+            </section>
+
+            <!-- 2. БИБЛИОТЕКА -->
+            <section class="content-section" id="library">
+                <div class="games-grid" id="library-games"></div>
+                <div class="empty-library" id="empty-library" style="display:none">
+                    <i class="ri-gamepad-line"></i><p>Пусто</p>
+                </div>
+            </section>
+
+            <!-- 3. ЗАГРУЗКИ -->
+            <section class="content-section" id="downloads">
+                <div class="downloads-list" id="downloads-list">
+                    <div class="empty-state">Нет активных загрузок</div>
+                </div>
+            </section>
+
+            <!-- 4. СООБЩЕСТВО -->
+            <section class="content-section" id="community">
+                <div class="section-header"><h1>Топ игроков 🏆</h1></div>
+                <div class="community-container">
+                    <div class="leaderboard-panel">
+                        <div class="leaderboard-list" id="leaderboard-list">Loading...</div>
+                    </div>
+                    <div class="friends-panel">
+                        <h3>Друзья</h3>
+                        <div class="add-friend-box">
+                            <input type="text" id="friend-name-input" placeholder="Никнейм...">
+                            <button class="btn btn-primary" id="add-friend-btn"><i class="ri-user-add-line"></i></button>
+                        </div>
+                        <div id="friend-requests-container" style="display:none">
+                            <h4>Запросы</h4><div id="friend-requests-list"></div>
+                        </div>
+                        <h4>Мои друзья</h4>
+                        <div class="friends-list" id="friends-list"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 5. НАСТРОЙКИ -->
+            <section class="content-section" id="settings">
+                <div class="settings-header-new"><h1>Настройки</h1></div>
+                <div class="settings-grid-new">
+                    <!-- Карточки настроек -->
+                    <div class="settings-card">
+                        <div class="settings-card-header"><i class="ri-hard-drive-2-line"></i> Хранилище</div>
+                        <div class="settings-card-body">
+                            <div class="setting-row">
+                                <div class="setting-text">
+                                    <span class="setting-title">Папка установки</span>
+                                    <span class="setting-subtitle" id="games-path">C:\Games</span>
+                                </div>
+                                <button class="btn btn-secondary btn-sm" id="change-path-btn">Изменить</button>
+                            </div>
+                            <div class="setting-row">
+                                <div class="setting-text">
+                                    <span class="setting-title">Скорость</span>
+                                    <span class="setting-subtitle" id="speed-value">Безлимит</span>
+                                </div>
+                                <input type="range" id="speed-limit" min="0" max="50" step="1" value="0">
+                            </div>
+                            <div class="setting-row">
+                                <div class="setting-text"><span class="setting-title">История</span></div>
+                                <button class="btn btn-danger btn-sm" id="clear-history-btn">Очистить</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="settings-card">
+                        <div class="settings-card-header"><i class="ri-palette-line"></i> Вид</div>
+                        <div class="settings-card-body">
+                            <div class="setting-row">
+                                <span class="setting-title">Темы</span>
+                                <button class="btn btn-secondary btn-sm" id="create-theme-btn">Создать</button>
+                            </div>
+                            <div class="themes-grid-mini" id="themes-grid"></div>
+                        </div>
+                    </div>
+
+                    <div class="settings-card">
+                        <div class="settings-card-header"><i class="ri-settings-3-line"></i> Система</div>
+                        <div class="settings-card-body">
+                            <div class="setting-row">
+                                <div class="setting-text">
+                                    <span class="setting-title">Версия</span>
+                                    <span class="setting-subtitle" id="current-version">...</span>
+                                </div>
+                                <button class="btn btn-primary btn-sm" id="check-updates-btn">Проверить</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-card full-width">
+                        <div class="settings-card-header"><i class="ri-trophy-line"></i> Достижения</div>
+                        <div class="settings-card-body" id="achievements"></div>
+                        <div class="settings-card-body" id="download-history"></div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- ========== МОДАЛЬНЫЕ ОКНА (Все на одном уровне) ========== -->
+
+    <!-- 1. Детали игры (Fullscreen) -->
+    <div class="fullscreen-overlay" id="game-detail-modal">
+        <button class="close-fullscreen" id="game-detail-close"><i class="ri-close-line"></i></button>
+        <div class="detail-hero">
+            <div class="detail-hero-content">
+                <h1 id="detail-game-title">Game Title</h1>
+                <div class="detail-meta-row">
+                    <span class="meta-tag" id="detail-game-size">-- GB</span>
+                    <span class="meta-tag">Windows</span>
+                    <span class="meta-tag" id="detail-game-ver">v1.0</span>
+                </div>
+                <div class="detail-actions">
+                    <button class="action-btn primary" id="detail-install-btn"><i class="ri-download-line"></i> Установить</button>
+                    <button class="action-btn secondary" id="detail-add-library-btn"><i class="ri-bookmark-line"></i> В библиотеку</button>
+                    <button class="action-btn success" id="detail-play-btn" style="display:none"><i class="ri-play-fill"></i> Играть</button>
+                    <button class="action-btn danger" id="detail-uninstall-btn" style="display:none"><i class="ri-delete-bin-line"></i> Удалить</button>
+                </div>
+            </div>
+        </div>
+        <div class="detail-content-scroll">
+            <div class="detail-grid">
+                <div class="detail-main">
+                    <h3>Об игре</h3>
+                    <div id="detail-game-description" class="description-text"></div>
+                    <h3>Скриншоты</h3>
+                    <div id="screenshots-container" class="screenshots-grid"></div>
+                </div>
+                <div class="detail-sidebar">
+                    <div class="info-block">
+                        <span class="label">Источник</span>
+                        <span class="value" id="detail-source-name">Xatab</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Скачивание -->
+    <div class="modal-overlay" id="download-modal">
+        <div class="modal modal-download">
+            <div class="download-header">
+                <i class="ri-download-cloud-2-line"></i><h3 id="download-game-title">Загрузка...</h3>
+            </div>
+            <div class="download-body">
+                <div class="status-row"><span id="download-status">...</span><span id="progress-percent">0%</span></div>
+                <div class="progress-track"><div id="progress-fill" class="progress-bar"></div></div>
+                <div class="meta-row"><span id="progress-size"></span><div id="torrent-info"></div></div>
+                <button class="btn btn-secondary full-width" id="cancel-download-btn">Отмена</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. Вход -->
+    <div class="modal-overlay" id="auth-modal">
+        <div class="modal" id="auth-modal-content" style="width: 350px;">
+            <div class="modal-header">
+                <h2 id="auth-title">Вход</h2>
+                <button class="modal-close" id="auth-close"><i class="ri-close-line"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group"><label>Email</label><input type="email" id="auth-email"></div>
+                <div class="form-group"><label>Пароль</label><input type="password" id="auth-password"></div>
+                <div class="form-group" id="auth-name-group" style="display:none"><label>Имя</label><input type="text" id="auth-name"></div>
+                <button class="btn btn-primary" id="auth-submit-btn">Войти</button>
+                <div style="margin-top:15px;text-align:center"><a href="#" id="auth-switch-btn">Регистрация</a></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. Ручное добавление игры -->
+    <div class="modal-overlay" id="add-game-modal">
+        <div class="modal">
+            <div class="modal-header"><h2>Добавить игру</h2><button class="modal-close" id="modal-close"><i class="ri-close-line"></i></button></div>
+            <div class="modal-body">
+                <div class="form-group"><label>Название</label><input type="text" id="game-name"></div>
+                <div class="form-group"><label>Путь .exe</label><div class="file-input"><input type="text" id="game-path"><button id="browse-btn">...</button></div></div>
+                <div class="form-group"><label>Обложка URL</label><input type="text" id="game-cover"></div>
+            </div>
+            <div class="modal-footer"><button class="btn btn-secondary" id="cancel-btn">Отмена</button><button class="btn btn-primary" id="save-game-btn">Добавить</button></div>
+        </div>
+    </div>
+
+    <!-- 5. Настройки игры (Редактирование) -->
+    <div class="modal-overlay" id="game-settings-modal">
+        <div class="modal modal-large">
+            <div class="modal-header"><h2>Настройки игры</h2><button class="modal-close" id="settings-modal-close"><i class="ri-close-line"></i></button></div>
+            <div class="modal-body">
+                <div class="settings-preview">
+                    <div class="preview-cover"><img id="preview-cover-img"></div>
+                    <div class="preview-info"><h3 id="preview-game-name">...</h3><p id="preview-game-path">...</p></div>
+                </div>
+                <div class="form-group"><label>Название</label><input type="text" id="edit-game-name"></div>
+                <div class="form-group"><label>Путь</label><div class="file-input"><input type="text" id="edit-game-path"><button id="edit-browse-btn">...</button></div></div>
+                <div class="form-group"><label>Обложка</label><div class="file-input"><input type="text" id="edit-game-cover"><button id="edit-cover-browse-btn">...</button></div></div>
+                <div class="form-group"><label>Параметры</label><input type="text" id="edit-launch-params"></div>
+                <div class="form-group"><label>Теги</label><input type="text" id="edit-game-tags"></div>
+                <div class="game-stats">
+                    <div class="stat-item"><span class="stat-label">Время</span><span class="stat-value" id="stat-playtime">0</span></div>
+                    <div class="stat-item"><span class="stat-label">Добавлено</span><span class="stat-value" id="stat-added">...</span></div>
+                    <div class="stat-item"><span class="stat-label">Запуск</span><span class="stat-value" id="stat-last-played">...</span></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-danger" id="delete-game-btn">Удалить</button>
+                <div class="modal-footer-right"><button class="btn btn-secondary" id="cancel-settings-btn">Отмена</button><button class="btn btn-primary" id="save-settings-btn">Сохранить</button></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 6. Редактор тем -->
+    <div class="modal-overlay" id="theme-editor-modal">
+        <div class="modal modal-theme-editor">
+            <div class="modal-header"><h2 id="theme-editor-title">Тема</h2><button class="modal-close" id="theme-editor-close"><i class="ri-close-line"></i></button></div>
+            <div class="modal-body">
+                <div class="theme-editor-layout">
+                    <div class="theme-editor-controls">
+                        <div class="form-group"><label>Название</label><input type="text" id="theme-name-input"></div>
+                        <div class="color-section">
+                            <h4>Цвета</h4>
+                            <div class="color-picker-group"><label>Фон 1</label><div class="color-input-wrapper"><input type="color" id="color-bg-primary"><input type="text" class="color-text" data-for="color-bg-primary"></div></div>
+                            <div class="color-picker-group"><label>Фон 2</label><div class="color-input-wrapper"><input type="color" id="color-bg-secondary"><input type="text" class="color-text" data-for="color-bg-secondary"></div></div>
+                            <div class="color-picker-group"><label>Фон 3</label><div class="color-input-wrapper"><input type="color" id="color-bg-tertiary"><input type="text" class="color-text" data-for="color-bg-tertiary"></div></div>
+                            <div class="color-picker-group"><label>Акцент</label><div class="color-input-wrapper"><input type="color" id="color-accent"><input type="text" class="color-text" data-for="color-accent"></div></div>
+                            <div class="color-picker-group"><label>Текст</label><div class="color-input-wrapper"><input type="color" id="color-text-primary"><input type="text" class="color-text" data-for="color-text-primary"></div></div>
+                            <div class="color-picker-group"><label>Текст 2</label><div class="color-input-wrapper"><input type="color" id="color-text-secondary"><input type="text" class="color-text" data-for="color-text-secondary"></div></div>
+                            <div class="color-picker-group"><label>Рамки</label><div class="color-input-wrapper"><input type="color" id="color-border"><input type="text" class="color-text" data-for="color-border"></div></div>
+                            <div class="color-picker-group"><label>Карточка</label><div class="color-input-wrapper"><input type="color" id="color-card-bg"><input type="text" class="color-text" data-for="color-card-bg"></div></div>
+                        </div>
+                    </div>
+                    <div class="theme-preview">
+                        <h4>Превью</h4>
+                        <div class="preview-container" id="theme-preview-container">
+                            <div class="preview-sidebar"><div class="preview-avatar"></div><div class="preview-menu-item active"></div></div>
+                            <div class="preview-content"><div class="preview-header"></div><div class="preview-cards"><div class="preview-card"></div></div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-danger" id="delete-theme-btn" style="display:none">Удалить</button>
+                <div class="modal-footer-right">
+                    <button class="btn btn-secondary" id="export-theme-btn">Экспорт</button>
+                    <button class="btn btn-secondary" id="import-theme-btn">Импорт</button>
+                    <button class="btn btn-secondary" id="cancel-theme-btn">Отмена</button>
+                    <button class="btn btn-primary" id="save-theme-btn">Сохранить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 7. Контекстное меню -->
+    <div class="context-menu" id="context-menu">
+        <div class="context-menu-item" id="ctx-play"><i class="ri-play-fill"></i> Запустить</div>
+        <div class="context-menu-item" id="ctx-settings"><i class="ri-settings-3-line"></i> Настройки</div>
+        <div class="context-menu-item" id="ctx-open-folder"><i class="ri-folder-open-line"></i> Папка</div>
+        <div class="context-menu-divider"></div>
+        <div class="context-menu-item danger" id="ctx-delete"><i class="ri-delete-bin-line"></i> Удалить</div>
+    </div>
+
+    <!-- Уведомления (пустое, создается JS) -->
+    <script src="renderer.js"></script>
+</body>
+</html>

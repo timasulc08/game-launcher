@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Swift Launcher</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+</head>
+
+<body>
+    <div class="title-bar">
+        <button class="title-btn" id="minimize-btn"><i class="ri-subtract-line"></i></button>
+        <button class="title-btn" id="maximize-btn"><i class="ri-checkbox-blank-line"></i></button>
+        <button class="title-btn close-btn" id="close-btn"><i class="ri-close-line"></i></button>
+    </div>
+
+    <div class="app-container">
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <div class="app-logo">
+                <i class="ri-planet-fill"></i>
+                <span>SWIFT</span>
+            </div>
+
+            <!-- Профиль -->
+            <div class="profile-section">
+                <div class="avatar" id="user-avatar">
+                    <i class="ri-user-fill"></i>
+                </div>
+                <div class="profile-info">
+                    <span class="username" id="user-name">Гость</span>
+                    <button class="login-btn" id="login-btn">Войти</button>
+                </div>
+            </div>
+
+            <nav class="nav-menu">
+                <a href="#" class="nav-item active" data-section="store">
+                    <i class="ri-store-2-fill"></i> Store
+                </a>
+                <a href="#" class="nav-item" data-section="library">
+                    <i class="ri-gamepad-fill"></i> Library
+                </a>
+                <a href="#" class="nav-item" data-section="downloads">
+                    <i class="ri-download-cloud-2-line"></i> <span>Загрузки</span>
+                    <span id="nav-download-badge" class="nav-badge" style="display:none">1</span>
+                </a>
+                <a href="#" class="nav-item" data-section="community">
+                    <i class="ri-global-line"></i>
+                    <span>Сообщество</span>
+                </a>
+                <a href="#" class="nav-item" id="random-game-btn">
+                    <i class="ri-dice-line"></i> Random
+                </a>
+                <a href="#" class="nav-item" data-section="settings" style="margin-top: auto;">
+                    <i class="ri-settings-3-fill"></i> Settings
+                </a>
+            </nav>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+            <!-- Header -->
+            <div class="content-header">
+                <div class="page-title">Library</div>
+                <div class="header-controls">
+                    <div class="search-container">
+                        <i class="ri-search-line"></i>
+                        <input type="text" id="search-input" placeholder="Search games...">
+                    </div>
+                    <button class="filter-btn active">All</button>
+                    <button class="filter-btn">Installed</button>
+                </div>
+            </div>
+
+            <!-- Content: Store -->
+            <section class="content-section active" id="store">
+                <!-- HERO BANNER -->
+                <div class="hero-banner" id="hero-banner">
+                    <div class="hero-overlay">
+                        <div class="hero-tag">Featured</div>
+                        <h1 class="hero-title" id="hero-title">Loading...</h1>
+                        <p class="hero-desc" id="hero-desc">...</p>
+                        <button class="hero-btn" id="hero-btn">
+                            <i class="ri-eye-fill"></i> VIEW DETAILS
+                        </button>
+                    </div>
+                </div>
+
+                <div class="section-bar">
+                    <div class="section-title">All Games</div>
+                </div>
+
+                <div class="games-grid" id="store-games"></div>
+                <div class="pagination" id="pagination"></div>
+            </section>
+
+            <!-- Content: Library -->
+            <section class="content-section" id="library">
+                <div class="games-grid" id="library-games"></div>
+            </section>
+
+            <section class="content-section" id="downloads">
+                <div class="downloads-list" id="downloads-list">
+                    <div class="empty-state">Нет активных загрузок</div>
+                </div>
+            </section>
+
+
+            <!-- Сообщество -->
+            <section class="content-section" id="community">
+                <div class="section-header">
+                    <h1>Топ игроков 🏆</h1>
+                </div>
+
+                <div class="community-container">
+                    <!-- Левая колонка: Лидерборд -->
+                    <div class="leaderboard-panel">
+                        <div class="leaderboard-list" id="leaderboard-list">
+                            <div style="text-align:center; padding:20px;">Загрузка топа...</div>
+                        </div>
+                    </div>
+
+                    <!-- Правая колонка: Друзья -->
+                    <div class="friends-panel">
+                        <h3>Community</h3>
+
+                        <!-- Поиск и добавление -->
+                        <div class="add-friend-box">
+                            <input type="text" id="friend-name-input" placeholder="Никнейм друга...">
+                            <button class="btn btn-primary" id="add-friend-btn"><i
+                                    class="ri-user-add-line"></i></button>
+                        </div>
+
+                        <!-- НОВОЕ: Входящие запросы -->
+                        <div id="friend-requests-container" style="display: none; margin-bottom: 15px;">
+                            <h4 style="font-size: 12px; color: var(--accent); margin-bottom: 8px;">Входящие запросы</h4>
+                            <div id="friend-requests-list" class="requests-list"></div>
+                        </div>
+
+                        <!-- Список друзей -->
+                        <h4 style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">Мои друзья</h4>
+                        <div class="friends-list" id="friends-list">
+                            <div style="text-align:center; color: var(--text-muted); font-size: 12px;">Нет друзей</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Settings (Keep hidden for now to fit design) -->
+            <!-- SETTINGS -->
+            <section class="content-section" id="settings">
+                <div class="settings-header-new">
+                    <h1>Настройки</h1>
+                </div>
+
+                <div class="settings-grid-new">
+                    <!-- Внешний вид -->
+                    <div class="settings-card">
+                        <div class="settings-card-header">
+                            <i class="ri-palette-line"></i> Внешний вид
+                        </div>
+                        <div class="settings-card-body">
+                            <div class="setting-row">
+                                <div class="setting-text">
+                                    <span class="setting-title">Темы оформления</span>
+                                    <span class="setting-subtitle">Выберите цветовую схему</span>
+                                </div>
+                                <button class="btn btn-secondary btn-sm" id="create-theme-btn">Создать тему</button>
+                            </div>
+                            <!-- Сюда JS вставит сетку тем -->
+                            <div class="themes-grid-mini" id="themes-grid"></div>
+                        </div>
+                    </div>
+
+                    <!-- Загрузки и Память -->
+                    <div class="settings-card">
+                        <div class="settings-card-header">
+                            <i class="ri-hard-drive-2-line"></i> Хранилище и Сеть
+                        </div>
+                        <div class="settings-card-body">
+                            <div class="setting-row">
+                                <div class="setting-text">
+                                    <span class="setting-title">Папка установки</span>
+                                    <span class="setting-subtitle" id="games-path">C:\Games</span>
+                                </div>
+                                <button class="btn btn-secondary btn-sm" id="change-path-btn">Изменить</button>
+                            </div>
+                            
+                            <div class="setting-row">
+                                <div class="setting-text">
+                                    <span class="setting-title">Лимит скорости</span>
+                                    <span class="setting-subtitle" id="speed-value">Безлимит</span>
+                                </div>
+                                <input type="range" id="speed-limit" min="0" max="50" step="1" value="0">
+                            </div>
+
+                            <div class="setting-row">
+                                <div class="setting-text">
+                                    <span class="setting-title">История скачиваний</span>
+                                    <span class="setting-subtitle">Очистить список загрузок</span>
+                                </div>
+                                <button class="btn btn-danger btn-sm" id="clear-history-btn">Очистить</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Общие -->
+                    <div class="settings-card">
+                        <div class="settings-card-header">
+                            <i class="ri-settings-3-line"></i> Система
+                        </div>
+                        <div class="settings-card-body">
+                            <div class="setting-row">
+                                <div class="setting-text">
+                                    <span class="setting-title">Автозапуск</span>
+                                    <span class="setting-subtitle">Запускать вместе с Windows</span>
+                                </div>
+                                <label class="toggle">
+                                    <input type="checkbox" id="autostart-toggle">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            
+                            <div class="setting-row">
+                                <div class="setting-text">
+                                    <span class="setting-title">Проверка обновлений</span>
+                                    <span class="setting-subtitle">Текущая версия: <span id="current-version">1.0.0</span></span>
+                                </div>
+                                <button class="btn btn-primary btn-sm" id="check-updates-btn">Проверить</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Достижения -->
+                    <div class="settings-card full-width">
+                        <div class="settings-card-header">
+                            <i class="ri-trophy-line"></i> Мои достижения
+                        </div>
+                        <div class="settings-card-body" id="achievements">
+                            <!-- Сюда JS вставит достижения -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Твои модальные окна (оставь как были) -->
+    <!-- ... paste modals here ... -->
+    <!-- Модальное окно деталей игры -->
+    <div class="fullscreen-overlay" id="game-detail-modal">
+        <button class="close-fullscreen" id="game-detail-close"><i class="ri-close-line"></i></button>
+
+        <!-- Огромный хедер без картинки (градиент) -->
+        <div class="detail-hero">
+            <div class="detail-hero-content">
+                <h1 id="detail-game-title">Game Title</h1>
+                <div class="detail-meta-row">
+                    <span class="meta-tag" id="detail-game-size">-- GB</span>
+                    <span class="meta-tag">Windows</span>
+                    <span class="meta-tag" id="detail-game-ver">v1.0</span>
+                </div>
+                <div class="detail-actions">
+                    <button class="action-btn primary" id="detail-install-btn">
+                        <i class="ri-download-line"></i> Установить
+                    </button>
+                    <button class="action-btn secondary" id="detail-add-library-btn">
+                        <i class="ri-bookmark-line"></i> В библиотеку
+                    </button>
+                    <button class="action-btn success" id="detail-play-btn" style="display:none">
+                        <i class="ri-play-fill"></i> Играть
+                    </button>
+                    <button class="action-btn danger" id="detail-uninstall-btn" style="display:none">
+                        <i class="ri-delete-bin-line"></i> Удалить
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="detail-content-scroll">
+            <div class="detail-grid">
+                <div class="detail-main">
+                    <h3>Об игре</h3>
+                    <div id="detail-game-description" class="description-text"></div>
+
+                    <h3>Скриншоты</h3>
+                    <div id="screenshots-container" class="screenshots-grid"></div>
+                </div>
+                <div class="detail-sidebar">
+                    <div class="info-block">
+                        <span class="label">Источник</span>
+                        <span class="value" id="detail-source-name">Xatab</span>
+                    </div>
+                    <!-- Сюда можно добавить выбор источника -->
+                    <div id="detail-sources-list"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Модальное окно Входа -->
+        <div class="modal-overlay" id="auth-modal">
+            <div class="modal" style="width: 350px;">
+                <div class="modal-header">
+                    <h2 id="auth-title">Вход</h2>
+                    <button class="modal-close" id="auth-close"><i class="ri-close-line"></i></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="auth-email" placeholder="example@mail.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Пароль</label>
+                        <input type="password" id="auth-password" placeholder="******">
+                    </div>
+                    <!-- Поле имени только для регистрации -->
+                    <div class="form-group" id="auth-name-group" style="display: none;">
+                        <label>Имя пользователя</label>
+                        <input type="text" id="auth-name" placeholder="Ваш никнейм">
+                    </div>
+
+                    <button class="btn btn-primary" id="auth-submit-btn" style="width: 100%;">Войти</button>
+
+                    <div style="margin-top: 15px; text-align: center; font-size: 12px; color: #888;">
+                        <span id="auth-switch-text">Нет аккаунта?</span>
+                        <a href="#" id="auth-switch-btn"
+                            style="color: var(--accent); text-decoration: none;">Зарегистрироваться</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Модальное окно скачивания -->
+        <div class="modal-overlay" id="download-modal">
+            <div class="modal" style="width: 400px; padding: 20px;">
+                <div class="modal-header" style="border:none; padding:0; margin-bottom:15px;">
+                    <h2 id="download-game-title" style="font-size:18px;">Название игры</h2>
+                </div>
+
+                <div class="modal-body" style="padding:0;">
+                    <div id="download-status" style="margin-bottom:10px; color:#888; font-size:13px;">Подключение...
+                    </div>
+
+                    <!-- Прогресс бар -->
+                    <div style="height:6px; background:#333; border-radius:3px; overflow:hidden; margin-bottom:5px;">
+                        <div id="progress-fill"
+                            style="width:0%; height:100%; background:var(--accent); transition:width 0.2s;"></div>
+                    </div>
+
+                    <div style="display:flex; justify-content:space-between; font-size:12px; color:#666;">
+                        <span id="progress-percent">0%</span>
+                        <span id="progress-size">-- / --</span>
+                    </div>
+
+                    <!-- Инфо о торренте -->
+                    <div id="torrent-info" style="margin-top:15px; font-size:12px; color:#888;"></div>
+                </div>
+
+                <div class="modal-footer" style="border:none; padding:0; margin-top:20px;">
+                    <button class="btn btn-secondary" id="cancel-download-btn" style="width:100%;">Отмена</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Важно: Скрипт -->
+        <script src="renderer.js"></script>
+</body>
+</html>
